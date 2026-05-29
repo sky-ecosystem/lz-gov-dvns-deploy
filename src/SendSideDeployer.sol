@@ -1,24 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.24;
 
-// Contract types imported strictly to `new` them in the constructor (interfaces can't be instantiated).
 import { CCIPDVNAdapter }       from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapter.sol";
 import { CCIPDVNAdapterFeeLib } from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapterFeeLib.sol";
-import { LZDVNInit, CCIPDVNRemote } from "./LZDVNInit.sol";
-
-interface AdapterLike {
-    function setWorkerFeeLib(address) external;
-    function grantRole (bytes32 role, address account) external;
-    function revokeRole(bytes32 role, address account) external;
-}
-
-interface OwnableLike {
-    function transferOwnership(address newOwner) external;
-}
-
-interface InitializableFeeLibLike {
-    function initialize() external;
-}
+import { LZDVNInit, CCIPDVNCfg } from "./LZDVNInit.sol";
 
 interface ChainlogLike {
     function getAddress(bytes32) external view returns (address);
@@ -47,19 +32,21 @@ contract SendSideDeployer {
         address[] memory admins = new address[](1);
         admins[0] = address(this);
 
-        adapter = address(new CCIPDVNAdapter(admins, ccipRouter));
-        feeLib  = address(new CCIPDVNAdapterFeeLib());
+        CCIPDVNAdapter       a = new CCIPDVNAdapter(admins, ccipRouter);
+        CCIPDVNAdapterFeeLib f = new CCIPDVNAdapterFeeLib();
+        adapter = address(a);
+        feeLib  = address(f);
 
         // Upstream FeeLib is built for hardhat-deploy proxies. Calling
         // initialize() once on a freshly deployed instance seals the `proxied`
         // admin slot and runs __Ownable_init() with msg.sender as owner.
-        InitializableFeeLibLike(feeLib).initialize();
+        f.initialize();
 
-        AdapterLike(adapter).setWorkerFeeLib(feeLib);
+        a.setWorkerFeeLib(feeLib);
     }
 
-    function configure(CCIPDVNRemote calldata remote, address[] calldata allowedOApps) external onlyDeployer {
-        LZDVNInit.wireCCIPDVN(adapter, feeLib, remote, allowedOApps);
+    function configure(CCIPDVNCfg calldata cfg) external onlyDeployer {
+        LZDVNInit.wireCCIPDVN(adapter, feeLib, cfg);
     }
 
     /// @dev Hands FeeLib ownership and adapter admin to PAUSE_PROXY (read from
@@ -67,13 +54,13 @@ contract SendSideDeployer {
     ///      disables `renounceRole`.
     function handOff(address[] calldata revokeOApps) external onlyDeployer {
         address pauseProxy = chainlog.getAddress("MCD_PAUSE_PROXY");
-        AdapterLike a = AdapterLike(adapter);
+        CCIPDVNAdapter a = CCIPDVNAdapter(payable(adapter));
 
         for (uint256 i = 0; i < revokeOApps.length; ++i) {
             a.revokeRole(ALLOWLIST, revokeOApps[i]);
         }
 
-        OwnableLike(feeLib).transferOwnership(pauseProxy);
+        CCIPDVNAdapterFeeLib(feeLib).transferOwnership(pauseProxy);
 
         a.grantRole(DEFAULT_ADMIN_ROLE, pauseProxy);
         a.grantRole(ADMIN_ROLE,         pauseProxy);
