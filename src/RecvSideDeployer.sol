@@ -29,8 +29,6 @@ struct RecvSideChain {
     address finalAdmin;
 }
 
-/// @notice Single auditable deployer for the remote (recv-side) CCIP DVN adapter
-///         + both DVN broadcasters. Admin handoff happens in the same call.
 contract RecvSideDeployer {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant ADMIN_ROLE         = keccak256("ADMIN_ROLE");
@@ -44,10 +42,8 @@ contract RecvSideDeployer {
     /// @dev `chain.finalAdmin == address(0)` leaves no admin on the adapter
     ///      (provably can't send — no one can grant MESSAGE_LIB_ROLE).
     /// @dev Self-revoke uses `revokeRole` (not `renounceRole`, which Worker disables).
-    /// @dev Everything happens in the constructor because `new CCIPDVNAdapter`
-    ///      (~21KB) embeds its bytecode in the deployer; in a function that
-    ///      would blow the EIP-170 24KB runtime limit. In the constructor it
-    ///      lives in initcode (EIP-3860 49KB limit).
+    /// @dev `new CCIPDVNAdapter` lives in the constructor (not a function) so its
+    ///      ~21KB bytecode lands in initcode (EIP-3860, 49KB) instead of runtime (EIP-170, 24KB).
     constructor(RecvSideChain memory chain) {
         address[] memory admins = new address[](1);
         admins[0] = address(this);

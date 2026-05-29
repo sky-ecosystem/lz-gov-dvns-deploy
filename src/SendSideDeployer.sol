@@ -24,17 +24,6 @@ interface ChainlogLike {
     function getAddress(bytes32) external view returns (address);
 }
 
-/// @notice Single auditable deployer for the L1 (send-side) CCIP DVN adapter + FeeLib.
-///         Holds the adapter/feeLib admin roles for the lifetime of the bring-up;
-///         the owner EOA drives the flow via gated functions.
-///
-///         Expected flow:
-///           1. new SendSideDeployer(ccipRouter)                  on L1
-///           2. new RecvSideDeployer(chain)                       on each remote chain
-///           3. configure(remote, allowedOApps)                   on L1, once per remote
-///                  (remote.remoteCcipAdapter + remoteCcipBroadcaster come from step 2)
-///           4. (smoke test through an allowed OApp)
-///           5. handOff(revokeOApps)                              on L1; moves roles to PAUSE_PROXY
 contract SendSideDeployer {
     ChainlogLike internal constant chainlog = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
