@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 // Contract types imported strictly to `new` them in the constructor (interfaces can't be instantiated).
 import { CCIPDVNAdapter }  from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapter.sol";
@@ -42,8 +42,6 @@ contract RecvSideDeployer {
     /// @dev `chain.finalAdmin == address(0)` leaves no admin on the adapter
     ///      (provably can't send — no one can grant MESSAGE_LIB_ROLE).
     /// @dev Self-revoke uses `revokeRole` (not `renounceRole`, which Worker disables).
-    /// @dev `new CCIPDVNAdapter` lives in the constructor (not a function) so its
-    ///      ~21KB bytecode lands in initcode (EIP-3860, 49KB) instead of runtime (EIP-170, 24KB).
     constructor(RecvSideChain memory chain) {
         address[] memory admins = new address[](1);
         admins[0] = address(this);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 // Contract types imported strictly to `new` them in the constructor (interfaces can't be instantiated).
 import { CCIPDVNAdapter }       from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapter.sol";
@@ -41,9 +41,6 @@ contract SendSideDeployer {
         _;
     }
 
-    /// @dev `new CCIPDVNAdapter` lives in the constructor (not a function) so
-    ///      the bytecode lands in initcode (EIP-3860, 49KB) instead of runtime
-    ///      (EIP-170, 24KB) — the adapter alone is ~21KB.
     constructor(address ccipRouter) {
         deployer = msg.sender;
 
