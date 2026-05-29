@@ -4,24 +4,14 @@ pragma solidity >=0.8.0;
 // Vendored struct/interface declarations — this file is intended to be
 // copied into downstream consumers (spells) that don't have the LZ-v2 deps.
 
-struct CCIPDVNCfg {
-    uint32    remoteEid;
-    address   sendUln302;
-    uint64    remoteChainSelector;
-    address   remoteCcipAdapter;
-    address   remoteCcipBroadcaster;
-    uint16    multiplierBps;
-    uint256   gas;
-    uint128   floorMarginUSD;
-    address[] allowedOApps;
-}
-
+// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/DVNAdapterBase.sol
 struct ReceiveLibParam {
     address sendLib;
     uint32  dstEid;
     bytes32 receiveLib;
 }
 
+// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapter.sol (ICCIPDVNAdapter.DstConfigParam)
 struct AdapterDstConfigParam {
     uint32  eid;
     uint16  multiplierBps;
@@ -30,6 +20,7 @@ struct AdapterDstConfigParam {
     bytes   peer;
 }
 
+// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapterFeeLib.sol (ICCIPDVNAdapterFeeLib.DstConfigParam)
 struct FeeLibDstConfigParam {
     uint32  dstEid;
     uint128 floorMarginUSD;
@@ -43,6 +34,18 @@ interface CCIPDVNAdapterLike {
 
 interface CCIPDVNAdapterFeeLibLike {
     function setDstConfig(FeeLibDstConfigParam[] calldata) external;
+}
+
+struct CCIPDVNCfg {
+    uint32    remoteEid;
+    address   sendUln302;
+    uint64    remoteChainSelector;
+    address   remoteCcipAdapter;
+    address   remoteCcipBroadcaster;
+    uint16    multiplierBps;
+    uint256   gas;
+    uint128   floorMarginUSD;
+    address[] allowedOApps;
 }
 
 /// @notice Spell-callable wiring helper for the CCIP DVN adapter and FeeLib.
