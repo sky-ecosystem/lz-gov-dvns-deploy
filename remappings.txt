@@ -1,0 +1,8 @@
+@layerzerolabs/lz-evm-protocol-v2/=lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/
+@layerzerolabs/lz-evm-messagelib-v2/=lib/LayerZero-v2/packages/layerzero-v2/evm/messagelib/
+@chainlink/contracts-ccip/=lib/chainlink-ccip-vendored/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
+hardhat-deploy/=lib/hardhat-deploy/
+forge-std/=lib/forge-std/src/
+lz-gov-dvns/=lib/lz-gov-dvns/src/
