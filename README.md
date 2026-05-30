@@ -34,3 +34,7 @@ forge build
 ```
 
 `SendSideDeployer` is not redeployed; `LZDVNInit.wireCCIPDVN` is the shared wiring path used by both flows.
+
+### Funding the send-side adapter
+
+The send-side `CCIPDVNAdapter` pays CCIP fees from its native balance. The first send finds it empty and reverts (`DVNAdapter_InsufficientBalance`) — seed it with a plain ETH transfer first. Subsequent sends self-replenish from accumulated SendLib fees.

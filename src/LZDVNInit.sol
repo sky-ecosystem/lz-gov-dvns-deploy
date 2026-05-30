@@ -4,13 +4,6 @@ pragma solidity >=0.8.0;
 // Vendored struct/interface declarations — this file is intended to be
 // copied into downstream consumers (spells) that don't have the LZ-v2 deps.
 
-// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/DVNAdapterBase.sol
-struct ReceiveLibParam {
-    address sendLib;
-    uint32  dstEid;
-    bytes32 receiveLib;
-}
-
 // from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapter.sol (ICCIPDVNAdapter.DstConfigParam)
 struct AdapterDstConfigParam {
     uint32  eid;
@@ -18,6 +11,13 @@ struct AdapterDstConfigParam {
     uint64  chainSelector;
     uint256 gas;
     bytes   peer;
+}
+
+// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/DVNAdapterBase.sol
+struct ReceiveLibParam {
+    address sendLib;
+    uint32  dstEid;
+    bytes32 receiveLib;
 }
 
 // from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapterFeeLib.sol (ICCIPDVNAdapterFeeLib.DstConfigParam)
@@ -30,6 +30,7 @@ interface CCIPDVNAdapterLike {
     function setDstConfig    (AdapterDstConfigParam[] calldata) external;
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
     function grantRole       (bytes32 role, address account) external;
+    function workerFeeLib    () external view returns (address);
 }
 
 interface CCIPDVNAdapterFeeLibLike {
@@ -38,67 +39,59 @@ interface CCIPDVNAdapterFeeLibLike {
 
 struct CCIPDVNCfg {
     uint32    remoteEid;
-    address   sendUln302;
     uint64    remoteChainSelector;
     address   remoteCcipAdapter;
     address   remoteCcipBroadcaster;
+    address   sendUln302;
     uint16    multiplierBps;
     uint256   gas;
     uint128   floorMarginUSD;
     address[] allowedOApps;
 }
 
-/// @notice Spell-callable wiring helper for the CCIP DVN adapter and FeeLib.
-///         Caller must hold ADMIN_ROLE + DEFAULT_ADMIN_ROLE on the adapter and
-///         own the FeeLib (deployer at bring-up via SendSideDeployer.configure;
-///         PauseProxy via spell after handoff).
+/// @notice Wires the CCIP DVN adapter + FeeLib for a new remote.
 library LZDVNInit {
 
-    bytes32 internal constant ALLOWLIST = keccak256("ALLOWLIST");
+    bytes32 internal constant ALLOWLIST        = keccak256("ALLOWLIST");
+    bytes32 internal constant MESSAGE_LIB_ROLE = keccak256("MESSAGE_LIB_ROLE");
 
-    function wireCCIPDVN(
-        address           adapter,
-        address           feeLib,
-        CCIPDVNCfg memory cfg
-    ) internal {
-        CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
+    function wireCCIPDVN(address adapter, address feeLib, CCIPDVNCfg memory cfg) internal {
+        CCIPDVNAdapterLike       a = CCIPDVNAdapterLike(adapter);
+        CCIPDVNAdapterFeeLibLike f = CCIPDVNAdapterFeeLibLike(feeLib);
 
-        {
-            AdapterDstConfigParam[] memory params = new AdapterDstConfigParam[](1);
-            params[0] = AdapterDstConfigParam({
-                eid:           cfg.remoteEid,
-                multiplierBps: cfg.multiplierBps,
-                chainSelector: cfg.remoteChainSelector,
-                gas:           cfg.gas,
-                peer:          abi.encode(cfg.remoteCcipAdapter)
-            });
-            a.setDstConfig(params);
-        }
+        // Sanity check
+        require(a.workerFeeLib() == feeLib, "LZDVNInit/feelib-not-wired");
 
-        // receiveLibs redirect: CCIP-delivered packets land at the remote
-        // broadcaster (decoded from this bytes32) instead of the real
-        // ReceiveUln302, which fans verify out across the N replicas.
-        {
-            ReceiveLibParam[] memory params = new ReceiveLibParam[](1);
-            params[0] = ReceiveLibParam({
-                sendLib:    cfg.sendUln302,
-                dstEid:     cfg.remoteEid,
-                receiveLib: bytes32(uint256(uint160(cfg.remoteCcipBroadcaster)))
-            });
-            a.setReceiveLibs(params);
-        }
+        AdapterDstConfigParam[] memory dstCfg = new AdapterDstConfigParam[](1);
+        dstCfg[0] = AdapterDstConfigParam({
+            eid:           cfg.remoteEid,
+            multiplierBps: cfg.multiplierBps,
+            chainSelector: cfg.remoteChainSelector,
+            gas:           cfg.gas,
+            peer:          abi.encode(cfg.remoteCcipAdapter)
+        });
+        a.setDstConfig(dstCfg);
 
-        {
-            FeeLibDstConfigParam[] memory params = new FeeLibDstConfigParam[](1);
-            params[0] = FeeLibDstConfigParam({
-                dstEid:         cfg.remoteEid,
-                floorMarginUSD: cfg.floorMarginUSD
-            });
-            CCIPDVNAdapterFeeLibLike(feeLib).setDstConfig(params);
-        }
+        // Route CCIP attestations to the remote CCIP broadcaster
+        ReceiveLibParam[] memory recvLibs = new ReceiveLibParam[](1);
+        recvLibs[0] = ReceiveLibParam({
+            sendLib:    cfg.sendUln302,
+            dstEid:     cfg.remoteEid,
+            receiveLib: bytes32(uint256(uint160(cfg.remoteCcipBroadcaster)))
+        });
+        a.setReceiveLibs(recvLibs);
 
-        // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the
-        // ACL strict (deny-by-default).
+        FeeLibDstConfigParam[] memory feeCfg = new FeeLibDstConfigParam[](1);
+        feeCfg[0] = FeeLibDstConfigParam({
+            dstEid:         cfg.remoteEid,
+            floorMarginUSD: cfg.floorMarginUSD
+        });
+        f.setDstConfig(feeCfg);
+
+        // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
+        a.grantRole(MESSAGE_LIB_ROLE, cfg.sendUln302);
+
+        // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the ACL strict (deny-by-default).
         for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
             a.grantRole(ALLOWLIST, cfg.allowedOApps[i]);
         }
