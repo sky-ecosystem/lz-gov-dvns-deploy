@@ -49,6 +49,7 @@ contract SendSideDeployer {
     function handOff(address[] calldata revokeOApps) external onlyDeployer {
         address pauseProxy = chainlog.getAddress("MCD_PAUSE_PROXY");
 
+        // WARNING: if no OApp is left allowlisted, anyone can send through the CCIP adapter.
         for (uint256 i = 0; i < revokeOApps.length; ++i) {
             adapter.revokeRole(ALLOWLIST, revokeOApps[i]);
         }
