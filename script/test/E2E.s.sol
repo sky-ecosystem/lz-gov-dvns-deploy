@@ -41,7 +41,7 @@ interface EndpointLike {
 // (4 CCIP + 4 msig replicas on recv side; both wings in recv UlnConfig at threshold=4 so
 // CCIP wing alone delivers), sends one packet, hands off send-side admin to MCD_PAUSE_PROXY.
 // Self-contained, rerunnable.
-contract StagingE2E is Script {
+contract E2E is Script {
     address constant LZ_ENDPOINT          = 0x1a44076050125825900e736c501f859c50fE728c;
     uint32  constant L1_EID               = 30101;
     address constant L1_SEND_ULN_302      = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
@@ -79,10 +79,10 @@ contract StagingE2E is Script {
                 ccipRouter:        BASE_CCIP_ROUTER,
                 receiveUln302:     BASE_RECEIVE_ULN_302,
                 sourceCcipAdapter: l1Adapter,
-                multisig:          deployer,    // staging: deployer plays the msig
+                multisig:          deployer,    // test: deployer plays the msig
                 nCcip:             4,
                 nMsig:             4,
-                finalAdmin:        address(0)   // staging: recv adapter fully locked
+                finalAdmin:        address(0)   // test: recv adapter fully locked
             });
             l2Counter       = new Counter(LZ_ENDPOINT, deployer);
             recvAdapter     = address(recvD.adapter());
