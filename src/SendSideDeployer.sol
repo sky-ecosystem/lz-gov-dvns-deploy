@@ -9,6 +9,10 @@ interface ChainlogLike {
     function getAddress(bytes32) external view returns (address);
 }
 
+interface SendLibLike {
+    function fees(address worker) external view returns (uint256);
+}
+
 contract SendSideDeployer {
     ChainlogLike internal constant chainlog   = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     address      internal constant CCIP_ROUTER = 0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D;
@@ -54,6 +58,14 @@ contract SendSideDeployer {
 
     function configure(CCIPDVNCfg calldata cfg) external onlyDeployer {
         LZDVNInit.wireCCIPDVN(address(adapter), address(feeLib), cfg);
+    }
+
+    // Recovers test funds to the deployer; call before handOff().
+    // If called, any adapter pre-funding should come later.
+    function withdrawFunds(address sendLib) external onlyDeployer {
+        uint256 accrued = SendLibLike(sendLib).fees(address(adapter));
+        if (accrued > 0) adapter.withdrawFee(sendLib, deployer, accrued);
+        adapter.withdrawToken(address(0), deployer, address(adapter).balance);
     }
 
     function handOff(address[] calldata revokeOApps) external onlyDeployer {
