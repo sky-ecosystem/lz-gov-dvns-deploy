@@ -60,8 +60,10 @@ contract StagingE2E is Script {
         // ---- L1: deploy SendSideDeployer + Counter ----
         uint256 l1Fork = vm.createSelectFork(vm.envString("ETH_RPC_URL"));
         vm.startBroadcast(deployer);
-        SendSideDeployer sendD = new SendSideDeployer();
         Counter l1Counter = new Counter(LZ_ENDPOINT, deployer);
+        address[] memory allowed = new address[](1);
+        allowed[0] = address(l1Counter);
+        SendSideDeployer sendD = new SendSideDeployer(L1_SEND_ULN_302, allowed);
         address l1Adapter = address(sendD.adapter());
         vm.stopBroadcast();
 
@@ -100,8 +102,6 @@ contract StagingE2E is Script {
         vm.selectFork(l1Fork);
         vm.startBroadcast(deployer);
 
-        address[] memory allowed = new address[](1);
-        allowed[0] = address(l1Counter);
         sendD.configure(CCIPDVNCfg({
             remoteEid:             BASE_EID,
             remoteChainSelector:   BASE_CHAIN_SELECTOR,

@@ -23,8 +23,8 @@ struct ReceiveLibParam {
 interface CCIPDVNAdapterLike {
     function setDstConfig    (AdapterDstConfigParam[] calldata) external;
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
-    function grantRole       (bytes32 role, address account) external;
     function workerFeeLib    () external view returns (address);
+    function hasRole         (bytes32 role, address account) external view returns (bool);
 }
 
 struct CCIPDVNCfg {
@@ -38,7 +38,7 @@ struct CCIPDVNCfg {
     address[] allowedOApps;
 }
 
-/// @notice Wires the CCIP DVN adapter + FeeLib for a new remote.
+/// @notice Wires the CCIP DVN adapter routing for a new remote.
 library LZDVNInit {
 
     bytes32 internal constant ALLOWLIST        = keccak256("ALLOWLIST");
@@ -47,8 +47,12 @@ library LZDVNInit {
     function wireCCIPDVN(address adapter, address feeLib, CCIPDVNCfg memory cfg) internal {
         CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
 
-        // Sanity check
-        require(a.workerFeeLib() == feeLib, "LZDVNInit/feelib-not-wired");
+        // Sanity checks
+        require(a.workerFeeLib() == feeLib,                  "LZDVNInit/feelib-not-wired");
+        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendUln302), "LZDVNInit/sendlib-missing-role");
+        for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
+            require(a.hasRole(ALLOWLIST, cfg.allowedOApps[i]), "LZDVNInit/oapp-not-allowlisted");
+        }
 
         AdapterDstConfigParam[] memory dstCfg = new AdapterDstConfigParam[](1);
         dstCfg[0] = AdapterDstConfigParam({
@@ -68,13 +72,5 @@ library LZDVNInit {
             receiveLib: bytes32(uint256(uint160(cfg.remoteCcipBroadcaster)))
         });
         a.setReceiveLibs(recvLibs);
-
-        // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
-        a.grantRole(MESSAGE_LIB_ROLE, cfg.sendUln302);
-
-        // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the ACL strict (deny-by-default).
-        for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
-            a.grantRole(ALLOWLIST, cfg.allowedOApps[i]);
-        }
     }
 }

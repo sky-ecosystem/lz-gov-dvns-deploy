@@ -17,6 +17,7 @@ contract SendSideDeployer {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant ADMIN_ROLE         = keccak256("ADMIN_ROLE");
     bytes32 internal constant ALLOWLIST          = keccak256("ALLOWLIST");
+    bytes32 internal constant MESSAGE_LIB_ROLE   = keccak256("MESSAGE_LIB_ROLE");
 
     address              public immutable deployer;
     CCIPDVNAdapter       public immutable adapter;
@@ -27,7 +28,7 @@ contract SendSideDeployer {
         _;
     }
 
-    constructor() {
+    constructor(address sendLib, address[] memory allowedOApps) {
         deployer = msg.sender;
 
         // Upstream FeeLib is built for hardhat-deploy proxies. Calling
@@ -40,6 +41,15 @@ contract SendSideDeployer {
         admins[0] = address(this);
         adapter = new CCIPDVNAdapter(admins, CCIP_ROUTER);
         adapter.setWorkerFeeLib(address(feeLib));
+
+        // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
+        adapter.grantRole(MESSAGE_LIB_ROLE, sendLib);
+
+        // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the ACL strict (deny-by-default).
+        // The initial allowed Oapps may include a testing designated one, which can be revoked on handoff
+        for (uint256 i = 0; i < allowedOApps.length; ++i) {
+            adapter.grantRole(ALLOWLIST, allowedOApps[i]);
+        }
     }
 
     function configure(CCIPDVNCfg calldata cfg) external onlyDeployer {
