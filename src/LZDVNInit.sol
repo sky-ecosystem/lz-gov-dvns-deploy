@@ -5,7 +5,7 @@ pragma solidity >=0.8.0;
 // copied into downstream consumers (spells) that don't have the LZ-v2 deps.
 
 // from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapter.sol (ICCIPDVNAdapter.DstConfigParam)
-struct AdapterDstConfigParam {
+struct DstConfigParam {
     uint32  eid;
     uint16  multiplierBps;
     uint64  chainSelector;
@@ -21,7 +21,7 @@ struct ReceiveLibParam {
 }
 
 interface CCIPDVNAdapterLike {
-    function setDstConfig    (AdapterDstConfigParam[] calldata) external;
+    function setDstConfig    (DstConfigParam[] calldata) external;
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
     function workerFeeLib    () external view returns (address);
     function hasRole         (bytes32 role, address account) external view returns (bool);
@@ -54,8 +54,8 @@ library LZDVNInit {
             require(a.hasRole(ALLOWLIST, cfg.allowedOApps[i]), "LZDVNInit/oapp-not-allowlisted");
         }
 
-        AdapterDstConfigParam[] memory dstCfg = new AdapterDstConfigParam[](1);
-        dstCfg[0] = AdapterDstConfigParam({
+        DstConfigParam[] memory dstCfg = new DstConfigParam[](1);
+        dstCfg[0] = DstConfigParam({
             eid:           cfg.remoteEid,
             multiplierBps: cfg.multiplierBps,
             chainSelector: cfg.remoteChainSelector,

@@ -146,7 +146,7 @@ contract SendSideTest is Test {
         vm.deal(address(adapter), 1 ether);
         uint256 before = address(this).balance;
 
-        dep.withdrawFunds(L1_SEND_ULN_302);
+        dep.withdrawFunds();
 
         // Native balance is fully swept to the deployer; no accrued SendLib fees for a fresh adapter.
         assertEq(address(adapter).balance, 0);
@@ -168,7 +168,7 @@ contract SendSideTest is Test {
         vm.deal(address(adapter), 1 ether);
 
         uint256 before = address(this).balance;
-        dep.withdrawFunds(L1_SEND_ULN_302);
+        dep.withdrawFunds();
 
         // SendLib credit debited, adapter native swept, both pools landed on the deployer.
         assertEq(SendLibLike(L1_SEND_ULN_302).fees(address(adapter)), 0);
@@ -179,7 +179,7 @@ contract SendSideTest is Test {
     function test_withdrawFundsRevertsWhenNotDeployer() public {
         vm.prank(stranger);
         vm.expectRevert("SendSideDeployer/not-deployer");
-        dep.withdrawFunds(L1_SEND_ULN_302);
+        dep.withdrawFunds();
     }
 
     function test_handOff() public {

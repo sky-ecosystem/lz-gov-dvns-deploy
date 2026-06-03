@@ -10,7 +10,7 @@ interface ChainlogLike {
 }
 
 interface SendLibLike {
-    function fees(address worker) external view returns (uint256);
+    function fees(address) external view returns (uint256);
 }
 
 contract SendSideDeployer {
@@ -24,6 +24,7 @@ contract SendSideDeployer {
     bytes32 internal constant MESSAGE_LIB_ROLE   = keccak256("MESSAGE_LIB_ROLE");
 
     address              public immutable deployer;
+    address              public immutable sendLib;
     CCIPDVNAdapter       public immutable adapter;
     CCIPDVNAdapterFeeLib public immutable feeLib;
 
@@ -32,8 +33,9 @@ contract SendSideDeployer {
         _;
     }
 
-    constructor(address sendLib, address[] memory allowedOApps) {
+    constructor(address _sendLib, address[] memory allowedOApps) {
         deployer = msg.sender;
+        sendLib  = _sendLib;
 
         // Upstream FeeLib is built for hardhat-deploy proxies. Calling
         // initialize() once on a freshly deployed instance seals the `proxied`
@@ -47,7 +49,7 @@ contract SendSideDeployer {
         adapter.setWorkerFeeLib(address(feeLib));
 
         // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
-        adapter.grantRole(MESSAGE_LIB_ROLE, sendLib);
+        adapter.grantRole(MESSAGE_LIB_ROLE, _sendLib);
 
         // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the ACL strict (deny-by-default).
         // The initial allowed Oapps may include a testing designated one, which can be revoked on handoff
@@ -62,9 +64,8 @@ contract SendSideDeployer {
 
     // Recovers test funds to the deployer; call before handOff().
     // If called, any adapter pre-funding should come later.
-    function withdrawFunds(address sendLib) external onlyDeployer {
-        uint256 accrued = SendLibLike(sendLib).fees(address(adapter));
-        if (accrued > 0) adapter.withdrawFee(sendLib, deployer, accrued);
+    function withdrawFunds() external onlyDeployer {
+        adapter.withdrawFee(sendLib, deployer, SendLibLike(sendLib).fees(address(adapter)));
         adapter.withdrawToken(address(0), deployer, address(adapter).balance);
     }
 
