@@ -20,21 +20,11 @@ struct ReceiveLibParam {
     bytes32 receiveLib;
 }
 
-// from @layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapterFeeLib.sol (ICCIPDVNAdapterFeeLib.DstConfigParam)
-struct FeeLibDstConfigParam {
-    uint32  dstEid;
-    uint128 floorMarginUSD;
-}
-
 interface CCIPDVNAdapterLike {
     function setDstConfig    (AdapterDstConfigParam[] calldata) external;
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
     function grantRole       (bytes32 role, address account) external;
     function workerFeeLib    () external view returns (address);
-}
-
-interface CCIPDVNAdapterFeeLibLike {
-    function setDstConfig(FeeLibDstConfigParam[] calldata) external;
 }
 
 struct CCIPDVNCfg {
@@ -45,7 +35,6 @@ struct CCIPDVNCfg {
     address   sendUln302;
     uint16    multiplierBps;
     uint256   gas;
-    uint128   floorMarginUSD;
     address[] allowedOApps;
 }
 
@@ -56,8 +45,7 @@ library LZDVNInit {
     bytes32 internal constant MESSAGE_LIB_ROLE = keccak256("MESSAGE_LIB_ROLE");
 
     function wireCCIPDVN(address adapter, address feeLib, CCIPDVNCfg memory cfg) internal {
-        CCIPDVNAdapterLike       a = CCIPDVNAdapterLike(adapter);
-        CCIPDVNAdapterFeeLibLike f = CCIPDVNAdapterFeeLibLike(feeLib);
+        CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
 
         // Sanity check
         require(a.workerFeeLib() == feeLib, "LZDVNInit/feelib-not-wired");
@@ -80,13 +68,6 @@ library LZDVNInit {
             receiveLib: bytes32(uint256(uint160(cfg.remoteCcipBroadcaster)))
         });
         a.setReceiveLibs(recvLibs);
-
-        FeeLibDstConfigParam[] memory feeCfg = new FeeLibDstConfigParam[](1);
-        feeCfg[0] = FeeLibDstConfigParam({
-            dstEid:         cfg.remoteEid,
-            floorMarginUSD: cfg.floorMarginUSD
-        });
-        f.setDstConfig(feeCfg);
 
         // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
         a.grantRole(MESSAGE_LIB_ROLE, cfg.sendUln302);

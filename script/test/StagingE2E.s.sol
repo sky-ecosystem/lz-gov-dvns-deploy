@@ -110,7 +110,6 @@ contract StagingE2E is Script {
             sendUln302:            L1_SEND_ULN_302,
             multiplierBps:         12000,
             gas:                   200_000,
-            floorMarginUSD:        0,
             allowedOApps:          allowed
         }));
 
