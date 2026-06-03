@@ -125,6 +125,9 @@ contract E2E is Script {
         MessagingFee memory fee = l1Counter.quote(BASE_EID, options);
         l1Counter.send{ value: fee.nativeFee }(BASE_EID, options);
 
+        // Reclaim the leftover prefund + accrued fees before handoff strands them with the pause proxy.
+        sendD.withdrawFunds();
+
         address[] memory toRevoke = new address[](1);
         toRevoke[0] = address(l1Counter);
         sendD.handOff(toRevoke);
