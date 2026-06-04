@@ -15,6 +15,17 @@ It deliberately does not expose functions for all ongoing operations such as upd
 
 ## Build
 
+Install dependencies once after cloning (requires Node >= 18 and yarn, e.g. via `corepack enable`):
+
+```bash
+git submodule update --init
+(cd lib/LayerZero-v2 && YARN_ENABLE_SCRIPTS=0 yarn install)
+```
+
+`YARN_ENABLE_SCRIPTS=0` skips all postinstall scripts — only the `.sol` sources are needed.
+
+Then:
+
 ```bash
 forge build
 ```
