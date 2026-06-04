@@ -50,13 +50,9 @@ contract RecvSideTest is Test {
         // Adapter points at the supplied CCIP router.
         assertEq(address(adapter.router()), CCIP_ROUTER);
 
-        // dst-config routes back to L1 (eid keyed by % 30000), pointing at the source adapter.
-        (uint64 chainSelector, uint16 multiplierBps, bytes memory peer, uint256 gas) =
-            adapter.dstConfig(L1_EID % 30000);
-        assertEq(chainSelector, L1_CHAIN_SELECTOR);
-        assertEq(multiplierBps, 0);
-        assertEq(gas,           0);
-        assertEq(peer,          abi.encode(sourceCcipAdapter));
+        (uint32 eid, bytes memory peer) = adapter.srcConfig(L1_CHAIN_SELECTOR);
+        assertEq(eid,  L1_EID % 30000);
+        assertEq(peer, abi.encode(sourceCcipAdapter));
 
         // Two broadcaster wings with the requested replica counts.
         DVNBroadcaster ccip = recv.ccipBroadcaster();
@@ -69,11 +65,6 @@ contract RecvSideTest is Test {
         assertEq(msig.rcvLib(),   receiveUln302);
         assertEq(ccip.verifier(), address(adapter));
         assertEq(msig.verifier(), multisig);
-    }
-
-    function test_constructorWithFinalAdmin() public {
-        RecvSideDeployer recv = _deploy(finalAdmin);
-        CCIPDVNAdapter   adapter = recv.adapter();
 
         // finalAdmin receives both roles; the deployer contract is revoked.
         assertTrue(adapter.hasRole(DEFAULT_ADMIN_ROLE, finalAdmin));

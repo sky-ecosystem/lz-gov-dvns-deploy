@@ -78,8 +78,9 @@ contract SendSideTest is Test {
         });
     }
 
-    function test_constructor() public {
+    function test_constructor() public view {
         assertEq(dep.deployer(), address(this));
+        assertEq(dep.sendLib(),  L1_SEND_ULN_302);
 
         // Adapter points at the hardcoded mainnet CCIP router.
         assertEq(address(adapter.router()), CCIP_ROUTER);
