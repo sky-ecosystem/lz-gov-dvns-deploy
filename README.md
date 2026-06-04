@@ -1,4 +1,4 @@
-# lz-dvns-deploy
+# lz-gov-dvns-deploy
 
 Deploy library for Sky's LayerZero governance DVN wings (CCIP + multisig).
 
