@@ -36,7 +36,7 @@ forge build
 
 ```
 1. new SendSideDeployer(sendLib, allowedOApps) on L1
-2. new RecvSideDeployer(chain)                 on remote   (also revokes deployer admin)
+2. new RecvSideDeployer(...)                   on remote   (also revokes deployer admin)
 3. sendDeployer.configure(cfg)                 on L1       (cfg.remote* come from step 2)
 4. <smoke test through an allowed OApp>
 5. sendDeployer.handOff(revokeOApps)           on L1       (moves roles to MCD_PAUSE_PROXY)
@@ -45,7 +45,7 @@ forge build
 ### Subsequent pairs (L1 already handed off)
 
 ```
-1. new RecvSideDeployer(chain)                 on remote
+1. new RecvSideDeployer(...)                   on remote
 2. spell via MCD_PAUSE_PROXY: LZDVNInit.wireCCIPDVN(adapter, feeLib, cfg)
 ```
 
