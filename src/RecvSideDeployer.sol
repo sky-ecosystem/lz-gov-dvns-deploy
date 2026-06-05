@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import { CCIPDVNAdapter }  from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapter.sol";
 import { ICCIPDVNAdapter } from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/interfaces/adapters/ICCIPDVNAdapter.sol";
-import { DVNBroadcaster }  from "lz-gov-dvns/DVNBroadcaster.sol";
+import { DVNBroadcaster }  from "lz-dvn-broadcaster/DVNBroadcaster.sol";
 
 contract RecvSideDeployer {
     uint32  internal constant L1_EID            = 30101;               // https://docs.layerzero.network/v2/deployments/deployed-contracts

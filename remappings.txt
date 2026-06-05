@@ -6,4 +6,4 @@
 @openzeppelin/contracts-upgradeable/=lib/LayerZero-v2/packages/layerzero-v2/evm/messagelib/node_modules/@openzeppelin/contracts-upgradeable/
 hardhat-deploy/=lib/LayerZero-v2/packages/layerzero-v2/evm/messagelib/node_modules/hardhat-deploy/
 forge-std/=lib/forge-std/src/
-lz-gov-dvns/=lib/lz-gov-dvns/src/
+lz-dvn-broadcaster/=lib/lz-dvn-broadcaster/src/

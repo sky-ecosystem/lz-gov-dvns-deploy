@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 
 import { CCIPDVNAdapter } from "@layerzerolabs/lz-evm-messagelib-v2/contracts/uln/dvn/adapters/CCIP/CCIPDVNAdapter.sol";
-import { DVNBroadcaster } from "lz-gov-dvns/DVNBroadcaster.sol";
+import { DVNBroadcaster } from "lz-dvn-broadcaster/DVNBroadcaster.sol";
 
 import { RecvSideDeployer } from "../src/RecvSideDeployer.sol";
 

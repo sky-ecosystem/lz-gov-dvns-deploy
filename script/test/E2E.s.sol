@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import { Script, console } from "forge-std/Script.sol";
 import { OApp, MessagingFee, Origin } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
-import { DVNBroadcaster }   from "lz-gov-dvns/DVNBroadcaster.sol";
+import { DVNBroadcaster }   from "lz-dvn-broadcaster/DVNBroadcaster.sol";
 
 import { SendSideDeployer } from "../../src/SendSideDeployer.sol";
 import { RecvSideDeployer } from "../../src/RecvSideDeployer.sol";

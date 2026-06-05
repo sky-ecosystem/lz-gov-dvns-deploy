@@ -4,7 +4,7 @@
 [submodule "lib/LayerZero-v2"]
 	path = lib/LayerZero-v2
 	url = https://github.com/LayerZero-Labs/LayerZero-v2
-[submodule "lib/lz-gov-dvns"]
-	path = lib/lz-gov-dvns
+[submodule "lib/lz-dvn-broadcaster"]
+	path = lib/lz-dvn-broadcaster
 	url = https://github.com/sky-ecosystem/lz-dvn-broadcaster
 	branch = dev
