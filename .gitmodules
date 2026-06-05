@@ -6,5 +6,5 @@
 	url = https://github.com/LayerZero-Labs/LayerZero-v2
 [submodule "lib/lz-gov-dvns"]
 	path = lib/lz-gov-dvns
-	url = https://github.com/sky-ecosystem/lz-gov-dvns
+	url = https://github.com/sky-ecosystem/lz-dvn-broadcaster
 	branch = dev
