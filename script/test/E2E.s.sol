@@ -107,7 +107,7 @@ contract E2E is Script {
             remoteChainSelector:   BASE_CHAIN_SELECTOR,
             remoteCcipAdapter:     recvAdapter,
             remoteCcipBroadcaster: ccipBroadcaster,
-            sendUln302:            L1_SEND_ULN_302,
+            sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
             gas:                   200_000,
             allowedOApps:          allowed

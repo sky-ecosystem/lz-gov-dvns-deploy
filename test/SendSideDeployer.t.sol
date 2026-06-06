@@ -71,7 +71,7 @@ contract SendSideTest is Test {
             remoteChainSelector:   BASE_CHAIN_SELECTOR,
             remoteCcipAdapter:     remoteAdapter,
             remoteCcipBroadcaster: remoteBroadcaster,
-            sendUln302:            L1_SEND_ULN_302,
+            sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
             gas:                   200_000,
             allowedOApps:          allowed
@@ -131,7 +131,7 @@ contract SendSideTest is Test {
 
     function test_configureRevertsWhenSendlibMissingRole() public {
         CCIPDVNCfg memory cfg = _cfg();
-        cfg.sendUln302 = makeAddr("unprivilegedSendLib");
+        cfg.sendLib = makeAddr("unprivilegedSendLib");
         vm.expectRevert("LZDVNInit/sendlib-missing-role");
         dep.configure(cfg);
     }
@@ -257,7 +257,7 @@ contract SendSideTest is Test {
             remoteChainSelector:   ARB_CHAIN_SELECTOR,
             remoteCcipAdapter:     arbAdapter,
             remoteCcipBroadcaster: arbBroadcaster,
-            sendUln302:            L1_SEND_ULN_302,
+            sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
             gas:                   300_000,
             allowedOApps:          allowed

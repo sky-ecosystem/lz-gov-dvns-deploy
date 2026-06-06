@@ -32,7 +32,7 @@ struct CCIPDVNCfg {
     uint64    remoteChainSelector;
     address   remoteCcipAdapter;
     address   remoteCcipBroadcaster;
-    address   sendUln302;
+    address   sendLib;
     uint16    multiplierBps;
     uint256   gas;
     address[] allowedOApps;
@@ -48,8 +48,8 @@ library LZDVNInit {
         CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
 
         // Sanity checks
-        require(a.workerFeeLib() == feeLib,                  "LZDVNInit/feelib-not-wired");
-        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendUln302), "LZDVNInit/sendlib-missing-role");
+        require(a.workerFeeLib() == feeLib,               "LZDVNInit/feelib-not-wired");
+        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendLib), "LZDVNInit/sendlib-missing-role");
         for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
             require(a.hasRole(ALLOWLIST, cfg.allowedOApps[i]), "LZDVNInit/oapp-not-allowlisted");
         }
@@ -67,7 +67,7 @@ library LZDVNInit {
         // Route CCIP attestations to the remote CCIP broadcaster
         ReceiveLibParam[] memory recvLibs = new ReceiveLibParam[](1);
         recvLibs[0] = ReceiveLibParam({
-            sendLib:    cfg.sendUln302,
+            sendLib:    cfg.sendLib,
             dstEid:     cfg.remoteEid,
             receiveLib: bytes32(uint256(uint160(cfg.remoteCcipBroadcaster)))
         });
