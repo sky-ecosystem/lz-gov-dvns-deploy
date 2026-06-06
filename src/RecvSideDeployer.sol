@@ -18,7 +18,7 @@ contract RecvSideDeployer {
 
     constructor(
         address ccipRouter,
-        address receiveUln302,
+        address receiveLib,
         address sourceCcipAdapter,
         address multisig,
         uint256 nCcip,
@@ -38,8 +38,8 @@ contract RecvSideDeployer {
         });
         adapter.setDstConfig(dstCfg);
 
-        ccipBroadcaster = new DVNBroadcaster(receiveUln302, address(adapter), nCcip);
-        msigBroadcaster = new DVNBroadcaster(receiveUln302, multisig,         nMsig);
+        ccipBroadcaster = new DVNBroadcaster(receiveLib, address(adapter), nCcip);
+        msigBroadcaster = new DVNBroadcaster(receiveLib, multisig,         nMsig);
 
         adapter.revokeRole(ADMIN_ROLE,         address(this));
         adapter.revokeRole(DEFAULT_ADMIN_ROLE, address(this));
