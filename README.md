@@ -46,7 +46,7 @@ forge build
 
 ```
 1. new RecvSideDeployer(...)                   on remote
-2. spell via MCD_PAUSE_PROXY: LZDVNInit.wireCCIPDVN(adapter, feeLib, cfg)
+2. spell via MCD_PAUSE_PROXY: LZDVNInit.wireCCIPDVN(adapter, cfg)
 ```
 
 `SendSideDeployer` is not redeployed; `LZDVNInit.wireCCIPDVN` is the shared wiring path used by both flows.

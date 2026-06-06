@@ -237,10 +237,9 @@ contract SendSideTest is Test {
     // Stands in for a governance spell wiring a new remote via the shared LZDVNInit
     // helper. Callers prank the pause proxy so the inlined adapter calls carry its
     // admin roles as msg.sender — the part that matters here — rather than literally
-    // reproducing the pause proxy's delegatecall. `feeLib_` is a param so the
-    // feelib-not-wired sanity check (unreachable via configure) is testable.
-    function castAddRoute(address feeLib_, CCIPDVNCfg memory cfg) public {
-        LZDVNInit.wireCCIPDVN(address(adapter), feeLib_, cfg);
+    // reproducing the pause proxy's delegatecall.
+    function castAddRoute(CCIPDVNCfg memory cfg) public {
+        LZDVNInit.wireCCIPDVN(address(adapter), cfg);
     }
 
     // The README's "subsequent pairs" flow: after handoff, a governance spell adds a
@@ -274,7 +273,7 @@ contract SendSideTest is Test {
 
         // The pause proxy (now the adapter admin) runs the spell.
         vm.startPrank(pauseProxy);
-        castAddRoute(address(feeLib), cfg);
+        castAddRoute(cfg);
         vm.stopPrank();
 
         // New Arbitrum route is wired by the pause proxy...
@@ -293,10 +292,4 @@ contract SendSideTest is Test {
         assertEq(baseCs, BASE_CHAIN_SELECTOR);
     }
 
-    // feelib-not-wired is unreachable through configure (it always passes the wired
-    // FeeLib), so cover it via a spell wiring with a mismatched FeeLib.
-    function test_wireRevertsWhenFeelibNotWired() public {
-        vm.expectRevert("LZDVNInit/feelib-not-wired");
-        this.castAddRoute(makeAddr("wrongFeeLib"), _cfg());
-    }
 }

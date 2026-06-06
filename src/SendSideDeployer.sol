@@ -59,7 +59,7 @@ contract SendSideDeployer {
     }
 
     function configure(CCIPDVNCfg calldata cfg) external onlyDeployer {
-        LZDVNInit.wireCCIPDVN(address(adapter), address(feeLib), cfg);
+        LZDVNInit.wireCCIPDVN(address(adapter), cfg);
     }
 
     // Recovers test funds to the deployer; call before handOff().
