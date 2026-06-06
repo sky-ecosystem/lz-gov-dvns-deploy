@@ -43,6 +43,10 @@ contract SendSideDeployer {
         feeLib = new CCIPDVNAdapterFeeLib();
         feeLib.initialize();
 
+        // Ownership is burned: the owner can only set config this FeeLib version never reads.
+        // If a future FeeLib version is ever wired, reconsider its ownership setup.
+        feeLib.renounceOwnership();
+
         address[] memory admins = new address[](1);
         admins[0] = address(this);
         adapter = new CCIPDVNAdapter(admins, CCIP_ROUTER);
@@ -76,8 +80,6 @@ contract SendSideDeployer {
         for (uint256 i = 0; i < revokeOApps.length; ++i) {
             adapter.revokeRole(ALLOWLIST, revokeOApps[i]);
         }
-
-        feeLib.transferOwnership(pauseProxy);
 
         adapter.grantRole(DEFAULT_ADMIN_ROLE, pauseProxy);
         adapter.grantRole(ADMIN_ROLE,         pauseProxy);

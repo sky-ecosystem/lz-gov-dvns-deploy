@@ -82,8 +82,8 @@ contract SendSideTest is Test {
         // Adapter points at the hardcoded mainnet CCIP router.
         assertEq(address(adapter.router()), CCIP_ROUTER);
 
-        // FeeLib deployed, initialized (owner = the deployer contract) and wired into the adapter.
-        assertEq(feeLib.owner(),         address(dep));
+        // FeeLib deployed, initialized (ownership burned) and wired into the adapter.
+        assertEq(feeLib.owner(),         address(0));
         assertEq(adapter.workerFeeLib(), address(feeLib));
 
         // Deployer contract holds both admin roles during bring-up.
@@ -176,10 +176,9 @@ contract SendSideTest is Test {
         revokeOApps[1] = oapp2;
         dep.handOff(revokeOApps);
 
-        // Roles + FeeLib ownership move to the pause proxy.
+        // Roles move to the pause proxy.
         assertTrue(adapter.hasRole(DEFAULT_ADMIN_ROLE, pauseProxy));
         assertTrue(adapter.hasRole(ADMIN_ROLE,         pauseProxy));
-        assertEq(feeLib.owner(), pauseProxy);
 
         // Deployer contract is fully de-roled.
         assertFalse(adapter.hasRole(DEFAULT_ADMIN_ROLE, address(dep)));
