@@ -23,37 +23,24 @@ struct ReceiveLibParam {
 interface CCIPDVNAdapterLike {
     function setDstConfig    (DstConfigParam[] calldata) external;
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
-    function hasRole         (bytes32 role, address account) external view returns (bool);
-    function allowlistSize   () external view returns (uint64);
 }
 
 struct CCIPDVNCfg {
-    uint32    remoteEid;
-    uint64    remoteChainSelector;
-    address   remoteCcipAdapter;
-    address   remoteCcipBroadcaster;
-    address   sendLib;
-    uint16    multiplierBps;
-    uint256   gas;
-    address[] allowedOApps;
+    uint32  remoteEid;
+    uint64  remoteChainSelector;
+    address remoteCcipAdapter;
+    address remoteCcipBroadcaster;
+    address sendLib;
+    uint16  multiplierBps;
+    uint256 gas;
 }
 
 /// @notice Wires the CCIP DVN adapter routing for a new remote.
 library LZDVNInit {
 
-    bytes32 internal constant ALLOWLIST        = keccak256("ALLOWLIST");
-    bytes32 internal constant MESSAGE_LIB_ROLE = keccak256("MESSAGE_LIB_ROLE");
-
     function wireCCIPDVN(address adapter, CCIPDVNCfg memory cfg) internal {
         CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
-
-        // Sanity checks
-        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendLib),     "LZDVNInit/sendlib-missing-role");
-        require(a.allowlistSize() == cfg.allowedOApps.length, "LZDVNInit/allowlist-size-mismatch");
-        for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
-            require(a.hasRole(ALLOWLIST, cfg.allowedOApps[i]), "LZDVNInit/oapp-not-allowlisted");
-        }
-
++
         DstConfigParam[] memory dstCfg = new DstConfigParam[](1);
         dstCfg[0] = DstConfigParam({
             eid:           cfg.remoteEid,

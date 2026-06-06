@@ -64,9 +64,6 @@ contract SendSideTest is Test {
     }
 
     function _cfg() internal view returns (CCIPDVNCfg memory cfg) {
-        address[] memory allowed = new address[](2);
-        allowed[0] = oapp;
-        allowed[1] = oapp2;
         cfg = CCIPDVNCfg({
             remoteEid:             BASE_EID,
             remoteChainSelector:   BASE_CHAIN_SELECTOR,
@@ -74,8 +71,7 @@ contract SendSideTest is Test {
             remoteCcipBroadcaster: remoteBroadcaster,
             sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
-            gas:                   200_000,
-            allowedOApps:          allowed
+            gas:                   200_000
         });
     }
 
@@ -127,28 +123,6 @@ contract SendSideTest is Test {
         CCIPDVNCfg memory cfg = _cfg();
         vm.prank(stranger);
         vm.expectRevert("SendSideDeployer/not-deployer");
-        dep.configure(cfg);
-    }
-
-    function test_configureRevertsWhenSendlibMissingRole() public {
-        CCIPDVNCfg memory cfg = _cfg();
-        cfg.sendLib = makeAddr("unprivilegedSendLib");
-        vm.expectRevert("LZDVNInit/sendlib-missing-role");
-        dep.configure(cfg);
-    }
-
-    function test_configureRevertsWhenOappNotAllowlisted() public {
-        CCIPDVNCfg memory cfg = _cfg();
-        cfg.allowedOApps[0] = makeAddr("strangerOApp");
-        vm.expectRevert("LZDVNInit/oapp-not-allowlisted");
-        dep.configure(cfg);
-    }
-
-    function test_configureRevertsWhenAllowlistSizeMismatch() public {
-        CCIPDVNCfg memory cfg = _cfg();
-        cfg.allowedOApps = new address[](1);
-        cfg.allowedOApps[0] = oapp;
-        vm.expectRevert("LZDVNInit/allowlist-size-mismatch");
         dep.configure(cfg);
     }
 
@@ -254,12 +228,9 @@ contract SendSideTest is Test {
 
         address pauseProxy = CHAINLOG.getAddress("MCD_PAUSE_PROXY");
 
-        // Spell config for a new remote (Arbitrum), reusing the L1 SendLib (still
-        // MESSAGE_LIB_ROLE) and the still-allowlisted production OApp.
+        // Spell config for a new remote (Arbitrum), reusing the L1 SendLib.
         address arbAdapter     = makeAddr("arbAdapter");
         address arbBroadcaster = makeAddr("arbBroadcaster");
-        address[] memory allowed = new address[](1);
-        allowed[0] = oapp;
         CCIPDVNCfg memory cfg = CCIPDVNCfg({
             remoteEid:             ARB_EID,
             remoteChainSelector:   ARB_CHAIN_SELECTOR,
@@ -267,8 +238,7 @@ contract SendSideTest is Test {
             remoteCcipBroadcaster: arbBroadcaster,
             sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
-            gas:                   300_000,
-            allowedOApps:          allowed
+            gas:                   300_000
         });
 
         // The pause proxy (now the adapter admin) runs the spell.

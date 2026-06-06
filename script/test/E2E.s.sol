@@ -108,8 +108,7 @@ contract E2E is Script {
             remoteCcipBroadcaster: ccipBroadcaster,
             sendLib:               L1_SEND_ULN_302,
             multiplierBps:         12000,
-            gas:                   200_000,
-            allowedOApps:          allowed
+            gas:                   200_000
         }));
 
         l1Counter.setPeer(BASE_EID, bytes32(uint256(uint160(address(l2Counter)))));
