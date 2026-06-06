@@ -9,7 +9,7 @@ import { DVNBroadcaster } from "lz-dvn-broadcaster/DVNBroadcaster.sol";
 import { RecvSideDeployer } from "../src/RecvSideDeployer.sol";
 
 // Mainnet-fork unit tests for the single-tx remote-side deployer. All wiring
-// (adapter dst-config back to L1, the two broadcaster wings, and admin handoff)
+// (adapter dst-config back to L1, the two broadcaster wings, and admin revocation)
 // happens inside the constructor, so the tests assert on post-construction state.
 contract RecvSideTest is Test {
     address constant CCIP_ROUTER       = 0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D;
@@ -25,26 +25,24 @@ contract RecvSideTest is Test {
     address receiveUln302    = makeAddr("receiveUln302");
     address sourceCcipAdapter = makeAddr("sourceCcipAdapter");
     address multisig         = makeAddr("multisig");
-    address finalAdmin       = makeAddr("finalAdmin");
 
     function setUp() public {
         vm.createSelectFork(vm.envString("ETH_RPC_URL"));
     }
 
-    function _deploy(address finalAdmin_) internal returns (RecvSideDeployer) {
+    function _deploy() internal returns (RecvSideDeployer) {
         return new RecvSideDeployer({
             ccipRouter:        CCIP_ROUTER,
             receiveUln302:     receiveUln302,
             sourceCcipAdapter: sourceCcipAdapter,
             multisig:          multisig,
             nCcip:             N_CCIP,
-            nMsig:             N_MSIG,
-            finalAdmin:        finalAdmin_
+            nMsig:             N_MSIG
         });
     }
 
     function test_constructor() public {
-        RecvSideDeployer recv = _deploy(finalAdmin);
+        RecvSideDeployer recv = _deploy();
         CCIPDVNAdapter   adapter = recv.adapter();
 
         // Adapter points at the supplied CCIP router.
@@ -66,22 +64,9 @@ contract RecvSideTest is Test {
         assertEq(ccip.verifier(), address(adapter));
         assertEq(msig.verifier(), multisig);
 
-        // finalAdmin receives both roles; the deployer contract is revoked.
-        assertTrue(adapter.hasRole(DEFAULT_ADMIN_ROLE, finalAdmin));
-        assertTrue(adapter.hasRole(ADMIN_ROLE,         finalAdmin));
-        assertFalse(adapter.hasRole(DEFAULT_ADMIN_ROLE, address(recv)));
-        assertFalse(adapter.hasRole(ADMIN_ROLE,         address(recv)));
-    }
-
-    function test_constructorNoFinalAdmin() public {
-        RecvSideDeployer recv = _deploy(address(0));
-        CCIPDVNAdapter   adapter = recv.adapter();
-
-        // finalAdmin == address(0): no admin is ever granted and the deployer is revoked,
+        // No admin is ever granted and the deployer is revoked,
         // so the adapter is provably unable to send.
         assertFalse(adapter.hasRole(DEFAULT_ADMIN_ROLE, address(recv)));
         assertFalse(adapter.hasRole(ADMIN_ROLE,         address(recv)));
-        assertFalse(adapter.hasRole(DEFAULT_ADMIN_ROLE, address(0)));
-        assertFalse(adapter.hasRole(ADMIN_ROLE,         address(0)));
     }
 }

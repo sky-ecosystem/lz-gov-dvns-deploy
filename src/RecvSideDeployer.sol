@@ -16,15 +16,13 @@ contract RecvSideDeployer {
     DVNBroadcaster public immutable ccipBroadcaster;
     DVNBroadcaster public immutable msigBroadcaster;
 
-    /// @dev `finalAdmin == address(0)` leaves no admin (provably can't send).
     constructor(
         address ccipRouter,
         address receiveUln302,
         address sourceCcipAdapter,
         address multisig,
         uint256 nCcip,
-        uint256 nMsig,
-        address finalAdmin
+        uint256 nMsig
     ) {
         address[] memory admins = new address[](1);
         admins[0] = address(this);
@@ -43,10 +41,6 @@ contract RecvSideDeployer {
         ccipBroadcaster = new DVNBroadcaster(receiveUln302, address(adapter), nCcip);
         msigBroadcaster = new DVNBroadcaster(receiveUln302, multisig,         nMsig);
 
-        if (finalAdmin != address(0)) {
-            adapter.grantRole(DEFAULT_ADMIN_ROLE, finalAdmin);
-            adapter.grantRole(ADMIN_ROLE,         finalAdmin);
-        }
         adapter.revokeRole(ADMIN_ROLE,         address(this));
         adapter.revokeRole(DEFAULT_ADMIN_ROLE, address(this));
     }

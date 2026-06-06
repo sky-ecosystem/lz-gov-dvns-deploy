@@ -81,8 +81,7 @@ contract E2E is Script {
                 sourceCcipAdapter: l1Adapter,
                 multisig:          deployer,    // test: deployer plays the msig
                 nCcip:             4,
-                nMsig:             4,
-                finalAdmin:        address(0)   // test: recv adapter fully locked
+                nMsig:             4
             });
             l2Counter       = new Counter(LZ_ENDPOINT, deployer);
             recvAdapter     = address(recvD.adapter());

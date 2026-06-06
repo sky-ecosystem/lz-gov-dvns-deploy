@@ -10,7 +10,7 @@ It deliberately does not expose functions for all ongoing operations such as upd
 ## Layout
 
 - `src/SendSideDeployer.sol` — auditable deployer for the L1 CCIP DVN adapter + FeeLib. Holds adapter admin during bring-up; owner EOA drives configure/handoff.
-- `src/RecvSideDeployer.sol` — single-tx auditable deployer for the remote-side CCIP adapter + DVN broadcasters (CCIP wing + multisig wing). Admin handoff happens inside the constructor.
+- `src/RecvSideDeployer.sol` — single-tx auditable deployer for the remote-side CCIP adapter + DVN broadcasters (CCIP wing + multisig wing). All admin roles are revoked inside the constructor.
 - `src/LZDVNInit.sol` — spell-callable wiring helper (`wireCCIPDVN`) that configures the CCIP DVN adapter's routing for a new remote.
 
 ## Build
@@ -36,7 +36,7 @@ forge build
 
 ```
 1. new SendSideDeployer(sendLib, allowedOApps) on L1
-2. new RecvSideDeployer(...)                   on remote   (also revokes deployer admin)
+2. new RecvSideDeployer(...)                   on remote   (leaves adapter with no admin)
 3. sendDeployer.configure(cfg)                 on L1       (cfg.remote* come from step 2)
 4. <smoke test through an allowed OApp>
 5. sendDeployer.handOff(revokeOApps)           on L1       (moves roles to MCD_PAUSE_PROXY)
