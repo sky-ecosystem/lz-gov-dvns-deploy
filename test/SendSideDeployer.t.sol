@@ -23,7 +23,7 @@ interface SendLibLike {
 contract SendSideTest is Test {
     using stdStorage for StdStorage;
 
-    ChainlogLike constant chainlog = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    ChainlogLike constant CHAINLOG = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
     // Real mainnet LayerZero SendUln302 — used as the SendLib granted MESSAGE_LIB_ROLE.
     address constant L1_SEND_ULN_302     = 0xbB2Ea70C9E858123480642Cf96acbcCE1372dCe1;
@@ -186,7 +186,7 @@ contract SendSideTest is Test {
     function test_handOff() public {
         dep.configure(_cfg());
 
-        address pauseProxy = chainlog.getAddress("MCD_PAUSE_PROXY");
+        address pauseProxy = CHAINLOG.getAddress("MCD_PAUSE_PROXY");
 
         address[] memory revokeOApps = new address[](2);
         revokeOApps[0] = oapp;
@@ -244,7 +244,7 @@ contract SendSideTest is Test {
         revokeOApps[0] = oapp2;
         dep.handOff(revokeOApps);
 
-        address pauseProxy = chainlog.getAddress("MCD_PAUSE_PROXY");
+        address pauseProxy = CHAINLOG.getAddress("MCD_PAUSE_PROXY");
 
         // Spell config for a new remote (Arbitrum), reusing the L1 SendLib (still
         // MESSAGE_LIB_ROLE) and the still-allowlisted production OApp.

@@ -14,7 +14,7 @@ interface SendLibLike {
 }
 
 contract SendSideDeployer {
-    ChainlogLike internal constant chainlog   = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    ChainlogLike internal constant CHAINLOG   = ChainlogLike(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     address      internal constant CCIP_ROUTER = 0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D;
 
     // Worker declares these `internal`, so we recompute them.
@@ -70,7 +70,7 @@ contract SendSideDeployer {
     }
 
     function handOff(address[] calldata revokeOApps) external onlyDeployer {
-        address pauseProxy = chainlog.getAddress("MCD_PAUSE_PROXY");
+        address pauseProxy = CHAINLOG.getAddress("MCD_PAUSE_PROXY");
 
         // WARNING: if no OApp is left allowlisted, anyone can send through the CCIP adapter.
         for (uint256 i = 0; i < revokeOApps.length; ++i) {
