@@ -64,8 +64,9 @@ contract SendSideTest is Test {
     }
 
     function _cfg() internal view returns (CCIPDVNCfg memory cfg) {
-        address[] memory allowed = new address[](1);
+        address[] memory allowed = new address[](2);
         allowed[0] = oapp;
+        allowed[1] = oapp2;
         cfg = CCIPDVNCfg({
             remoteEid:             BASE_EID,
             remoteChainSelector:   BASE_CHAIN_SELECTOR,
@@ -140,6 +141,14 @@ contract SendSideTest is Test {
         CCIPDVNCfg memory cfg = _cfg();
         cfg.allowedOApps[0] = makeAddr("strangerOApp");
         vm.expectRevert("LZDVNInit/oapp-not-allowlisted");
+        dep.configure(cfg);
+    }
+
+    function test_configureRevertsWhenAllowlistSizeMismatch() public {
+        CCIPDVNCfg memory cfg = _cfg();
+        cfg.allowedOApps = new address[](1);
+        cfg.allowedOApps[0] = oapp;
+        vm.expectRevert("LZDVNInit/allowlist-size-mismatch");
         dep.configure(cfg);
     }
 

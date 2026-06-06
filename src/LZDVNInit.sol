@@ -25,6 +25,7 @@ interface CCIPDVNAdapterLike {
     function setReceiveLibs  (ReceiveLibParam[] calldata) external;
     function workerFeeLib    () external view returns (address);
     function hasRole         (bytes32 role, address account) external view returns (bool);
+    function allowlistSize   () external view returns (uint64);
 }
 
 struct CCIPDVNCfg {
@@ -48,8 +49,9 @@ library LZDVNInit {
         CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
 
         // Sanity checks
-        require(a.workerFeeLib() == feeLib,               "LZDVNInit/feelib-not-wired");
-        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendLib), "LZDVNInit/sendlib-missing-role");
+        require(a.workerFeeLib() == feeLib,                   "LZDVNInit/feelib-not-wired");
+        require(a.hasRole(MESSAGE_LIB_ROLE, cfg.sendLib),     "LZDVNInit/sendlib-missing-role");
+        require(a.allowlistSize() == cfg.allowedOApps.length, "LZDVNInit/allowlist-size-mismatch");
         for (uint256 i = 0; i < cfg.allowedOApps.length; ++i) {
             require(a.hasRole(ALLOWLIST, cfg.allowedOApps[i]), "LZDVNInit/oapp-not-allowlisted");
         }
