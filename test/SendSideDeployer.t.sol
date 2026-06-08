@@ -126,6 +126,14 @@ contract SendSideTest is Test {
         dep.configure(cfg);
     }
 
+    function test_configureRevertsOnUndercutMultiplier() public {
+        // multiplierBps in (0, 1e4) would charge below the CCIP cost and drain the adapter.
+        CCIPDVNCfg memory cfg = _cfg();
+        cfg.multiplierBps = 9999;
+        vm.expectRevert("LZDVNInit/bad-multiplier");
+        dep.configure(cfg);
+    }
+
     function test_withdrawFunds() public {
         vm.deal(address(adapter), 1 ether);
         uint256 before = address(this).balance;

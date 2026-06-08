@@ -31,16 +31,19 @@ struct CCIPDVNCfg {
     address remoteCcipAdapter;
     address remoteCcipBroadcaster;
     address sendLib;
-    uint16  multiplierBps;
-    uint256 gas;
+    uint16  multiplierBps;  // premium on the CCIP fee in bps; 1e4 = break-even
+    uint256 gas;  // dest-chain exec gas for the CCIP attestation msg; keep <= CCIP maxPerMsgGasLimit
+                  // for the destination lane: https://docs.chain.link/ccip/service-limits/evm
 }
 
 /// @notice Wires the CCIP DVN adapter routing for a new remote.
-/// @dev Does not perform sanity checks; these are assumed to be done off-chain.
+/// @dev Does not perform deployment sanity checks; these are assumed to be done off-chain.
 library LZDVNInit {
 
     function wireCCIPDVN(address adapter, CCIPDVNCfg memory cfg) internal {
         CCIPDVNAdapterLike a = CCIPDVNAdapterLike(adapter);
+
+        require(cfg.multiplierBps == 0 || cfg.multiplierBps >= 1e4, "LZDVNInit/bad-multiplier");
 
         DstConfigParam[] memory dstCfg = new DstConfigParam[](1);
         dstCfg[0] = DstConfigParam({
