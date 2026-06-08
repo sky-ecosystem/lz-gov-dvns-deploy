@@ -57,6 +57,7 @@ contract SendSideDeployer {
 
         // First grantRole(ALLOWLIST, _) flips allowlistSize > 0 and makes the ACL strict (deny-by-default).
         // The initial allowed Oapps may include a testing designated one, which can be revoked on handoff
+        // WARNING: if no OApp is left allowlisted, anyone can send through the CCIP adapter after configuration.
         for (uint256 i = 0; i < allowedOApps.length; ++i) {
             adapter.grantRole(ALLOWLIST, allowedOApps[i]);
         }
