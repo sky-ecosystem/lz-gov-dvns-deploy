@@ -36,6 +36,7 @@ struct CCIPDVNCfg {
 }
 
 /// @notice Wires the CCIP DVN adapter routing for a new remote.
+/// @dev Does not perform sanity checks; these are assumed to be done off-chain.
 library LZDVNInit {
 
     function wireCCIPDVN(address adapter, CCIPDVNCfg memory cfg) internal {
