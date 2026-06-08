@@ -64,6 +64,7 @@ contract SendSideDeployer {
     }
 
     function configure(CCIPDVNCfg calldata cfg) external onlyDeployer {
+        require(cfg.sendLib == sendLib, "SendSideDeployer/wrong-sendlib");
         LZDVNInit.wireCCIPDVN(address(adapter), cfg);
     }
 

@@ -126,6 +126,13 @@ contract SendSideTest is Test {
         dep.configure(cfg);
     }
 
+    function test_configureRevertsOnWrongSendLib() public {
+        CCIPDVNCfg memory cfg = _cfg();
+        cfg.sendLib = makeAddr("otherSendLib");
+        vm.expectRevert("SendSideDeployer/wrong-sendlib");
+        dep.configure(cfg);
+    }
+
     function test_configureRevertsOnUndercutMultiplier() public {
         // multiplierBps in (0, 1e4) would charge below the CCIP cost and drain the adapter.
         CCIPDVNCfg memory cfg = _cfg();
