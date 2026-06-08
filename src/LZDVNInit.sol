@@ -26,7 +26,7 @@ interface CCIPDVNAdapterLike {
 }
 
 struct CCIPDVNCfg {
-    uint32  remoteEid;
+    uint32  remoteEid;  // raw v2 EID (e.g. 30184), not the %30000 form
     uint64  remoteChainSelector;
     address remoteCcipAdapter;
     address remoteCcipBroadcaster;
