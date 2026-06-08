@@ -99,7 +99,7 @@ contract SendSideTest is Test {
 
     function test_constructorRevertsOnReInitFeeLib() public {
         // FeeLib was sealed by the constructor's initialize() — it can't be re-initialized.
-        vm.expectRevert();
+        vm.expectRevert(bytes(""));
         feeLib.initialize();
     }
 
@@ -201,9 +201,14 @@ contract SendSideTest is Test {
         address[] memory revokeOApps = new address[](0);
         dep.handOff(revokeOApps);
 
-        // Deployer lost ADMIN_ROLE, so the adapter rejects further configuration.
+        // Deployer lost ADMIN_ROLE, so the adapter's setDstConfig rejects further configuration.
         CCIPDVNCfg memory cfg = _cfg();
-        vm.expectRevert();
+        vm.expectRevert(bytes(string.concat(
+            "AccessControl: account ",
+            vm.toLowercase(vm.toString(address(dep))),
+            " is missing role ",
+            vm.toString(ADMIN_ROLE)
+        )));
         dep.configure(cfg);
     }
 
