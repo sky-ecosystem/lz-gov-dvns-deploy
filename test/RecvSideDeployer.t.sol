@@ -22,7 +22,7 @@ contract RecvSideTest is Test {
     uint256 constant N_CCIP = 3;
     uint256 constant N_MSIG = 2;
 
-    address receiveLib       = makeAddr("receiveLib");
+    address endpoint         = makeAddr("endpoint");
     address sourceCcipAdapter = makeAddr("sourceCcipAdapter");
     address multisig         = makeAddr("multisig");
 
@@ -33,7 +33,7 @@ contract RecvSideTest is Test {
     function _deploy() internal returns (RecvSideDeployer) {
         return new RecvSideDeployer({
             ccipRouter:        CCIP_ROUTER,
-            receiveLib:        receiveLib,
+            endpoint:          endpoint,
             sourceCcipAdapter: sourceCcipAdapter,
             multisig:          multisig,
             nCcip:             N_CCIP,
@@ -58,9 +58,9 @@ contract RecvSideTest is Test {
         assertEq(ccip.getReplicas().length, N_CCIP);
         assertEq(msig.getReplicas().length, N_MSIG);
 
-        // Wings share the receive lib; CCIP wing verifies via the adapter, msig wing via the multisig.
-        assertEq(ccip.rcvLib(),   receiveLib);
-        assertEq(msig.rcvLib(),   receiveLib);
+        // Wings share the endpoint; CCIP wing verifies via the adapter, msig wing via the multisig.
+        assertEq(ccip.endpoint(), endpoint);
+        assertEq(msig.endpoint(), endpoint);
         assertEq(ccip.verifier(), address(adapter));
         assertEq(msig.verifier(), multisig);
 

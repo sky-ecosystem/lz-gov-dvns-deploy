@@ -77,7 +77,7 @@ contract E2E is Script {
             vm.startBroadcast(deployer);
             recvD = new RecvSideDeployer({
                 ccipRouter:        BASE_CCIP_ROUTER,
-                receiveLib:        BASE_RECEIVE_ULN_302,
+                endpoint:          LZ_ENDPOINT,
                 sourceCcipAdapter: l1Adapter,
                 multisig:          deployer,    // test: deployer plays the msig
                 nCcip:             4,
