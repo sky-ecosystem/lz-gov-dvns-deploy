@@ -8,3 +8,6 @@
 	path = lib/lz-dvn-broadcaster
 	url = https://github.com/sky-ecosystem/lz-dvn-broadcaster
 	branch = dev
+[submodule "lib/dss-test"]
+	path = lib/dss-test
+	url = https://github.com/makerdao/dss-test
