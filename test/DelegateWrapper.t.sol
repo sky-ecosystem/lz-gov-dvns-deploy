@@ -45,12 +45,13 @@ contract DelegateWrapperTest is DssTest {
     function setUp() public {
         vm.createSelectFork(vm.envString("ETH_RPC_URL"));
 
-        oapp    = new MockOApp();
-        wrapper = new DelegateWrapper(ENDPOINT); // this == ward
-        ward    = address(this);
+        oapp = new MockOApp();
+        ward = address(this);
 
-        // Seed one guardian.
-        wrapper.kiss(bud);
+        // Seed one guardian at construction; this == ward.
+        address[] memory buds_ = new address[](1);
+        buds_[0] = bud;
+        wrapper = new DelegateWrapper(ENDPOINT, buds_);
 
         // Install the wrapper as the OApp's LZ delegate.
         vm.prank(address(oapp)); endpoint.setDelegate(address(wrapper));
@@ -119,11 +120,18 @@ contract DelegateWrapperTest is DssTest {
     // --- construction / auth ---
 
     function testConstructor() public {
-        vm.expectEmit(true, true, true, true);
-        emit Rely(address(this));
-        DelegateWrapper w = new DelegateWrapper(ENDPOINT);
+        address[] memory buds_ = new address[](2);
+        buds_[0] = makeAddr("bud1");
+        buds_[1] = makeAddr("bud2");
+
+        vm.expectEmit(true, true, true, true); emit Rely(address(this));
+        vm.expectEmit(true, true, true, true); emit Kiss(buds_[0]);
+        vm.expectEmit(true, true, true, true); emit Kiss(buds_[1]);
+        DelegateWrapper w = new DelegateWrapper(ENDPOINT, buds_);
 
         assertEq(w.wards(address(this)), 1);
+        assertEq(w.buds(buds_[0]),       1);
+        assertEq(w.buds(buds_[1]),       1);
         assertEq(w.buds(address(this)),  0);
         assertEq(address(w.endpoint()),  ENDPOINT);
     }

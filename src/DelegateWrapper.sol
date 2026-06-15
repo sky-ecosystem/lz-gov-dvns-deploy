@@ -37,10 +37,16 @@ contract DelegateWrapper {
         _;
     }
 
-    constructor(address _endpoint) {
+    constructor(address _endpoint, address[] memory _buds) {
         endpoint = ILayerZeroEndpointV2(_endpoint);
+
         wards[msg.sender] = 1;
         emit Rely(msg.sender);
+
+        for (uint256 i = 0; i < _buds.length; i++) {
+            buds[_buds[i]] = 1;
+            emit Kiss(_buds[i]);
+        }
     }
 
     function rely(address usr) external auth {
