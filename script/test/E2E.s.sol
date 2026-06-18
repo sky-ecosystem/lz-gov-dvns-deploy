@@ -107,7 +107,7 @@ contract E2E is Script {
             remoteCcipAdapter:     recvAdapter,
             remoteCcipBroadcaster: ccipBroadcaster,
             sendLib:               L1_SEND_ULN_302,
-            multiplierBps:         12000,
+            multiplierBps:         0,  // fall back to the adapter's 10_000 break-even default
             gas:                   200_000
         }));
 

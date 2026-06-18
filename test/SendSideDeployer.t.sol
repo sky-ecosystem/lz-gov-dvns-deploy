@@ -70,7 +70,7 @@ contract SendSideTest is Test {
             remoteCcipAdapter:     remoteAdapter,
             remoteCcipBroadcaster: remoteBroadcaster,
             sendLib:               L1_SEND_ULN_302,
-            multiplierBps:         12000,
+            multiplierBps:         0,  // 0 => fall back to the adapter's 10_000 break-even default
             gas:                   200_000
         });
     }
@@ -85,6 +85,9 @@ contract SendSideTest is Test {
         // FeeLib deployed, initialized (ownership burned) and wired into the adapter.
         assertEq(feeLib.owner(),         address(0));
         assertEq(adapter.workerFeeLib(), address(feeLib));
+
+        // Default fee premium overridden from the adapter's hardcoded 12000 to break-even.
+        assertEq(adapter.defaultMultiplierBps(), 10_000);
 
         // Deployer contract holds both admin roles during bring-up.
         assertTrue(adapter.hasRole(DEFAULT_ADMIN_ROLE, address(dep)));
@@ -109,7 +112,7 @@ contract SendSideTest is Test {
         (uint64 chainSelector, uint16 multiplierBps, bytes memory peer, uint256 gas) =
             adapter.dstConfig(BASE_EID % 30000);
         assertEq(chainSelector, BASE_CHAIN_SELECTOR);
-        assertEq(multiplierBps, 12000);
+        assertEq(multiplierBps, 0);  // stored as-is; resolves to the 10_000 default at fee time
         assertEq(gas,           200_000);
         assertEq(peer,          abi.encode(remoteAdapter));
 
@@ -139,6 +142,30 @@ contract SendSideTest is Test {
         cfg.multiplierBps = 9999;
         vm.expectRevert("LZDVNInit/bad-multiplier");
         dep.configure(cfg);
+    }
+
+    // End-to-end fee resolution against the real mainnet CCIP router: a lane wired
+    // with multiplierBps == 0 inherits the constructor's 10_000 break-even default,
+    // while an explicit multiplierBps overrides it. getFee() requires an allowlisted
+    // sender and rejects non-empty options, so we quote as `oapp` with "".
+    function test_getFeeResolvesMultiplier() public {
+        CCIPDVNCfg memory cfg = _cfg();  // multiplierBps == 0
+
+        dep.configure(cfg);
+        uint256 feeZero = adapter.getFee(BASE_EID, 15, oapp, "");
+        assertGt(feeZero, 0);
+
+        // Explicit 10_000 must match the 0-fallback exactly (same break-even premium).
+        cfg.multiplierBps = 10_000;
+        dep.configure(cfg);
+        uint256 feeTenK = adapter.getFee(BASE_EID, 15, oapp, "");
+        assertEq(feeZero, feeTenK);
+
+        // Explicit 12_000 overrides the default: +20% on the same underlying CCIP fee.
+        cfg.multiplierBps = 12_000;
+        dep.configure(cfg);
+        uint256 feeTwelveK = adapter.getFee(BASE_EID, 15, oapp, "");
+        assertEq(feeTwelveK * 10_000, feeTenK * 12_000);
     }
 
     function test_withdrawFunds() public {
