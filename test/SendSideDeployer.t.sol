@@ -65,13 +65,13 @@ contract SendSideTest is Test {
 
     function _cfg() internal view returns (CCIPDVNCfg memory cfg) {
         cfg = CCIPDVNCfg({
-            remoteEid:             BASE_EID,
-            remoteChainSelector:   BASE_CHAIN_SELECTOR,
-            remoteCcipAdapter:     remoteAdapter,
-            remoteCcipBroadcaster: remoteBroadcaster,
-            sendLib:               L1_SEND_ULN_302,
-            multiplierBps:         0,  // 0 => fall back to the adapter's 10_000 break-even default
-            gas:                   200_000
+            remoteEid:               BASE_EID,
+            remoteCcipChainSelector: BASE_CHAIN_SELECTOR,
+            remoteCcipAdapter:       remoteAdapter,
+            remoteCcipBroadcaster:   remoteBroadcaster,
+            sendLib:                 L1_SEND_ULN_302,
+            multiplierBps:           0,  // 0 => fall back to the adapter's 10_000 break-even default
+            gas:                     200_000
         });
     }
 
@@ -161,11 +161,12 @@ contract SendSideTest is Test {
         uint256 feeTenK = adapter.getFee(BASE_EID, 15, oapp, "");
         assertEq(feeZero, feeTenK);
 
-        // Explicit 12_000 overrides the default: +20% on the same underlying CCIP fee.
+        // Explicit 12_000 overrides the default: +20% on the same underlying CCIP fee
+        // (feeTenK == raw ccipFee, so mirror the lib's integer math exactly).
         cfg.multiplierBps = 12_000;
         dep.configure(cfg);
         uint256 feeTwelveK = adapter.getFee(BASE_EID, 15, oapp, "");
-        assertEq(feeTwelveK * 10_000, feeTenK * 12_000);
+        assertEq(feeTwelveK, feeTenK * 12_000 / 10_000);
     }
 
     function test_withdrawFunds() public {
@@ -278,13 +279,13 @@ contract SendSideTest is Test {
         address arbAdapter     = makeAddr("arbAdapter");
         address arbBroadcaster = makeAddr("arbBroadcaster");
         CCIPDVNCfg memory cfg = CCIPDVNCfg({
-            remoteEid:             ARB_EID,
-            remoteChainSelector:   ARB_CHAIN_SELECTOR,
-            remoteCcipAdapter:     arbAdapter,
-            remoteCcipBroadcaster: arbBroadcaster,
-            sendLib:               L1_SEND_ULN_302,
-            multiplierBps:         12000,
-            gas:                   300_000
+            remoteEid:               ARB_EID,
+            remoteCcipChainSelector: ARB_CHAIN_SELECTOR,
+            remoteCcipAdapter:       arbAdapter,
+            remoteCcipBroadcaster:   arbBroadcaster,
+            sendLib:                 L1_SEND_ULN_302,
+            multiplierBps:           12000,
+            gas:                     300_000
         });
 
         // The pause proxy (now the adapter admin) runs the spell.

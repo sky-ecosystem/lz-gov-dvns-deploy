@@ -27,7 +27,7 @@ interface CCIPDVNAdapterLike {
 
 struct CCIPDVNCfg {
     uint32  remoteEid;  // raw v2 EID (e.g. 30184), not the %30000 form
-    uint64  remoteChainSelector;
+    uint64  remoteCcipChainSelector;
     address remoteCcipAdapter;
     address remoteCcipBroadcaster;
     address sendLib;
@@ -52,7 +52,7 @@ library LZDVNInit {
         dstCfg[0] = DstConfigParam({
             eid:           cfg.remoteEid,
             multiplierBps: cfg.multiplierBps,
-            chainSelector: cfg.remoteChainSelector,
+            chainSelector: cfg.remoteCcipChainSelector,
             gas:           cfg.gas,
             peer:          abi.encode(cfg.remoteCcipAdapter)
         });
