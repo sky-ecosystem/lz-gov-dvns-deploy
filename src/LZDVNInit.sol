@@ -45,6 +45,9 @@ library LZDVNInit {
 
         require(cfg.multiplierBps == 0 || cfg.multiplierBps >= 1e4, "LZDVNInit/bad-multiplier");
 
+        // WARNING: re-wiring the same eid silently keeps the old peer (only multiplierBps/gas update).
+        // There is no upstream route-update path, so replacing a remote CCIP adapter cannot be done by
+        // re-wiring this eid — it requires redeploying this CCIP adapter too.
         DstConfigParam[] memory dstCfg = new DstConfigParam[](1);
         dstCfg[0] = DstConfigParam({
             eid:           cfg.remoteEid,
