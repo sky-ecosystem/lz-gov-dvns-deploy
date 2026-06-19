@@ -23,6 +23,9 @@ contract SendSideDeployer {
     bytes32 internal constant ALLOWLIST          = keccak256("ALLOWLIST");
     bytes32 internal constant MESSAGE_LIB_ROLE   = keccak256("MESSAGE_LIB_ROLE");
 
+    // Break-even fee premium (1e4 = no markup over the raw CCIP fee)
+    uint16 internal constant DEFAULT_MULTIPLIER_BPS = 10_000;
+
     address              public immutable deployer;
     address              public immutable sendLib;
     CCIPDVNAdapter       public immutable adapter;
@@ -51,6 +54,7 @@ contract SendSideDeployer {
         admins[0] = address(this);
         adapter = new CCIPDVNAdapter(admins, CCIP_ROUTER);
         adapter.setWorkerFeeLib(address(feeLib));
+        adapter.setDefaultMultiplierBps(DEFAULT_MULTIPLIER_BPS);
 
         // MESSAGE_LIB_ROLE on the SendLib enables admin-triggered fee sweeps via Worker.withdrawFee.
         adapter.grantRole(MESSAGE_LIB_ROLE, _sendLib);

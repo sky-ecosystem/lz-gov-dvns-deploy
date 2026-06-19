@@ -102,13 +102,13 @@ contract E2E is Script {
         vm.startBroadcast(deployer);
 
         sendD.configure(CCIPDVNCfg({
-            remoteEid:             BASE_EID,
-            remoteChainSelector:   BASE_CHAIN_SELECTOR,
-            remoteCcipAdapter:     recvAdapter,
-            remoteCcipBroadcaster: ccipBroadcaster,
-            sendLib:               L1_SEND_ULN_302,
-            multiplierBps:         12000,
-            gas:                   200_000
+            remoteEid:               BASE_EID,
+            remoteCcipChainSelector: BASE_CHAIN_SELECTOR,
+            remoteCcipAdapter:       recvAdapter,
+            remoteCcipBroadcaster:   ccipBroadcaster,
+            sendLib:                 L1_SEND_ULN_302,
+            multiplierBps:           0,  // fall back to the adapter's 10_000 break-even default
+            gas:                     200_000
         }));
 
         l1Counter.setPeer(BASE_EID, bytes32(uint256(uint160(address(l2Counter)))));
