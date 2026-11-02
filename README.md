@@ -54,3 +54,16 @@ forge build
 ### Funding the send-side adapter
 
 The send-side `CCIPDVNAdapter` pays CCIP fees from its native balance. The first send finds it empty and reverts (`DVNAdapter_InsufficientBalance`) — seed it with a plain ETH transfer first. Subsequent sends self-replenish from accumulated SendLib fees.
+
+## Audits
+
+Audit reports are hosted on the auditors' public portfolio pages:
+
+| Auditor | Report | Date |
+| --- | --- | --- |
+| ChainSecurity | [Sky CCIP DVN Adapter](https://www.chainsecurity.com/security-audit/sky-ccip-dvn-adapter/) | 2026-06-23 |
+| ChainSecurity | [Sky LayerZero Governance DVN](https://www.chainsecurity.com/security-audit/sky-layerzero-governance-dvn/) | 2026-06-23 |
+| Cantina | [Sky: LZ Gov DVN Deploy](https://cantina.xyz/portfolio/2b0642e8-cd02-472b-9f67-86569ed51d44) | 2026-06-22 |
+| Cantina | [Sky: CCIP DVN Adapter](https://cantina.xyz/portfolio/4b674c75-9586-4d66-bc2e-1376f8de87fa) | 2026-06-22 |
+
+ChainSecurity reports are cumulative: each portfolio page hosts the latest version of the report, which covers all previously reviewed versions.
